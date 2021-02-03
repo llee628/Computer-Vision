@@ -82,8 +82,27 @@ def quantize(v, palette):
     Given a scalar v and array of values palette,
     return the index of the closest value
     """
-    closest_idx = np.argmin(np.abs(palette - v))
-    return closest_idx
+    #print(type(v))
+    # breakpoint()
+    if (np.isscalar(v)):
+        #print("v is a scalar!!")
+        closest_idx = np.argmin(np.abs(palette - v))
+        return closest_idx
+    else: ## handle the case that v is a vector
+        closest_idx_vector = []
+        #print("v is a vector!!")
+        for ele_v in v:
+            closest_idx = np.argmin(np.abs(palette - ele_v))
+            closest_idx_vector.append(closest_idx)
+
+        #breakpoint()
+        return np.array(closest_idx_vector)
+
+
+    
+
+
+    
 
 
 def quantizeNaive(IF, palette):
@@ -110,12 +129,14 @@ def quantizeFloyd(IF, palette):
     """
     H = IF.shape[0]
     W = IF.shape[1]
-    output = np.zeros((H,W))
+    output = np.zeros((H,W,3))
     IFcopy = IF.copy()
+    #breakpoint()
 
     for i in range(H):
         for j in range(W):
             oldValue = IFcopy[i,j]
+            #breakpoint()
             colorIndex = quantize(oldValue, palette)
             output[i,j] = colorIndex
             newValue = palette[colorIndex]
