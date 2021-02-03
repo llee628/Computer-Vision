@@ -63,6 +63,17 @@ def upscaleNN(I, target_size):
 
 def resizeToSquare(I, maxDim):
     """Given an image, make sure it's no bigger than maxDim on either side"""
+    width = I.shape[1]
+    height = I.shape[0]
+
+    #edge case
+    if (width < maxDim and height < maxDim):
+        return I
+
+    # dim = (width, height)
+    dim = (maxDim, maxDim)
+
+    I = cv2.resize(I, dim)
     return I
 
 
