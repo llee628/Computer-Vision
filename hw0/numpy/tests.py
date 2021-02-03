@@ -217,7 +217,13 @@ def t10(Xs):
     4) Our 3-line solution uses no loops, and uses the algebraic trick from the
        next problem.
     """
-    return None
+    L = len(Xs)
+    R = np.zeros((L,L))
+    for i, X in enumerate(Xs):
+    	for j, X in enumerate(Xs):
+    		R[i,j] = np.linalg.norm(np.mean(Xs[i], axis = 0) - np.mean(Xs[j], axis = 0))
+
+    return R
 
 
 def t11(X):
@@ -242,7 +248,17 @@ def t11(X):
        causing the square root to crash. Just take max(0, value) before the
        square root. Seems to occur on Macs.
     """
-    return None
+
+    a = (np.linalg.norm(X, axis = 1, keepdims = True))**2
+    b = ((np.linalg.norm(X, axis = 1, keepdims = True))**2).T
+    #print (a)
+    #print (b)
+    #print (np.dot(X,X.T))
+    #print(np.maximum(np.zeros((X.shape[0], X.shape[0])), a + b - 2*np.dot(X,X.T)).shape)
+    #C = a + b - 2*np.dot(X,X.T)
+    #print(C.shape)
+    #print(X.shape[0])
+    return np.sqrt(np.maximum(np.zeros((X.shape[0], X.shape[0])), a + b - 2*np.dot(X,X.T)))
 
 
 def t12(X, Y):
@@ -261,7 +277,9 @@ def t12(X, Y):
 
     Hints: Similar to previous problem
     """
-    return None
+    x_norm = (np.linalg.norm(X, axis = 1, keepdims = True))**2
+    y_norm = ((np.linalg.norm(Y, axis = 1, keepdims = True))**2).T
+    return np.sqrt(np.maximum(np.zeros((X.shape[0], Y.shape[0])), x_norm + y_norm - 2*np.dot(X,Y.T)))
 
 
 def t13(q, V):
@@ -278,7 +296,7 @@ def t13(q, V):
 
     Hint: np.argmax
     """
-    return None
+    return np.argmax(np.dot(q,V.T))
 
 
 def t14(X, y):
@@ -295,7 +313,9 @@ def t14(X, y):
 
     Hint: np.linalg.lstsq, or use the pseudoinverse (X^T X)^-1 X^T y
     """
-    return None
+    w = np.linalg.lstsq(np.dot(X.T,X),np.dot(X.T,y), rcond=None)[0]
+    #print(w.shape)
+    return w
 
 
 def t15(X, Y):
@@ -313,7 +333,7 @@ def t15(X, Y):
 
     Hint: np.cross
     """
-    return None
+    return np.cross(X,Y)
 
 
 def t16(X):
@@ -333,7 +353,10 @@ def t16(X):
     1) If it doesn't broadcast, reshape or np.expand_dims
     2) X[:, -1] gives the last column of X
     """
-    return None
+    # M = X.shape[1]
+    # N = X.shape[0]
+    # Y = X[:,0:M-1]/X[:,-1].reshape(N,1)
+    return X[:,0:X.shape[1]-1]/(X[:,-1].reshape(X.shape[0],1))
 
 
 def t17(X):
@@ -351,7 +374,7 @@ def t17(X):
 
     Hint: np.hstack, np.ones
     """
-    return None
+    return np.hstack((X,np.ones((X.shape[0], 1))))
 
 
 def t18(N, r, x, y):
@@ -374,7 +397,19 @@ def t18(N, r, x, y):
     1) np.meshgrid and np.arange give you X, Y
     2) Arrays have an astype method
     """
-    return None
+    
+    jj, ii = np.meshgrid(np.arange(0,N),np.arange(0,N))
+    #A = np.sqrt((jj-x)**2 + (ii-y)**2)
+    idx = (np.sqrt((jj-x)**2 + (ii-y)**2) < r)
+    #print(A)
+    # print(ii)
+    # print(idx.astype(int))
+    # print("x",x)
+    # print("y",y)
+    # print(r)
+    # print('\n')
+
+    return idx.astype(float)
 
 
 def t19(N, s, x, y):
@@ -394,7 +429,9 @@ def t19(N, s, x, y):
 
     Hint: Be careful with types -- float and int aren't the same!
     """
-    return None
+    jj, ii = np.meshgrid(np.arange(0,N),np.arange(0,N))
+    I = np.exp((-((jj-x)**2 + (ii-y)**2))/(s**2))
+    return I
 
 
 def t20(N, v):
@@ -416,4 +453,9 @@ def t20(N, v):
        (The sign of the numerator tells which side the point is on)
     2) np.abs
     """
-    return None
+    jj, ii = np.meshgrid(np.arange(0,N),np.arange(0,N))
+    # a = v[0]
+    # b = v[1]
+    # c = v[2]
+    M = np.abs(jj*v[0] + ii*v[1] + v[2])/np.sqrt(v[0]**2 + v[1]**2)
+    return M
