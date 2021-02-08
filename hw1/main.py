@@ -74,6 +74,7 @@ def part1():
     # generate_gif(Ry_theta_list)
     
     task1_1()
+    
 
 
     # Task 2:  Use rotX() and rotY() sequentially to check
