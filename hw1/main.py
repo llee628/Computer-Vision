@@ -60,31 +60,35 @@ def task1_1():
 
     generate_gif(Ry_theta_list)
 
+def task1_2():
+    theta = np.pi/4
+    Rx_theta = rotX(theta)
+    Ry_theta = rotY(theta)
+    
+    renderCube(R = Ry_theta.dot(Rx_theta), file_name='part1_2_1.png')
+    renderCube(R = Rx_theta.dot(Ry_theta), file_name='part1_2_2.png')
+
+def task1_3():
+    theta1 = degreeToRadian(35.5)
+    theta2 = degreeToRadian(45)
+    Rx_theta = rotX(theta1)
+    Ry_theta = rotY(theta2)
+    
+    renderCube(R=Rx_theta.dot(Ry_theta), file_name='part1_3.png')
+
 
 def part1():
     # TODO: Solution for Q1
     # Task 1: Use rotY() to generate cube.gif
-    #theta = degreeToRadian(30)
-    #Ry_theta = rotY(theta)
-    # Ry_theta_list = []
-
-    # for degree in range(361):
-    #     Ry_theta_list.append(rotY(degreeToRadian(degree)))
-
-    # generate_gif(Ry_theta_list)
     
-    task1_1()
-    
+    #task1_1()
+
 
 
     # Task 2:  Use rotX() and rotY() sequentially to check
     # the commutative property of Rotation Matrices
-    theta = np.pi/4
-    Rx_theta = rotX(theta)
-    Ry_theta = rotY(theta)
-    renderCube(R = Rx_theta.dot(Ry_theta), file_name='part1_2_1.png')
-    renderCube(R = Ry_theta.dot(Rx_theta), file_name='part1_2_2.png')
-
+    
+    task1_2()
 
 
     
@@ -92,6 +96,8 @@ def part1():
     # projection such that end points of diagonal overlap
     # Hint: Try rendering the cube with multiple configrations
     # to narrow down the search region
+    task1_3()
+
     pass
 
 
