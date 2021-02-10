@@ -81,7 +81,7 @@ def part1():
     # TODO: Solution for Q1
     # Task 1: Use rotY() to generate cube.gif
     
-    #task1_1()
+    task1_1()
 
 
 
@@ -107,8 +107,19 @@ def split_triptych(trip):
     Input:  trip: a triptych (H x W matrix)
     Output: R, G, B martices
     """
-    R, G, B = None, None, None
-    # TODO: Split a triptych into thirds and 
+    H = trip.shape[0]
+    W = trip.shape[1]
+    #breakpoint()
+
+    
+    # TODO: Split a triptych into thirds and
+    if H%3 == 0:
+        R, G, B = trip[int(2*H/3):H,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:]
+    elif H%3 == 1:
+        R, G, B = trip[int(2*H/3):H-1,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:]
+    else:
+        R, G, B = trip[int(2*H/3):H-2,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:] 
+    #breakpoint()
     # return three channels as numpy arrays
     return R, G, B
 
@@ -120,7 +131,24 @@ def normalized_cross_correlation(ch1, ch2):
             ch2: channel 2 matrix
     Output: normalized cross correlation (scalar)
     """
-    pass
+    a = ch1.reshape(ch1.size,1)
+    b = ch2.reshape(ch2.size,1)
+    a = a/np.linalg.norm(a)
+    b = b/np.linalg.norm(b)
+
+    output = (a.T) @ b
+    #breakpoint()
+
+    return output[0,0]
+
+def cross_correlation(ch1, ch2):
+    """
+    Without normalize
+    """
+    a = ch1.reshape(ch1.size,1)
+    b = ch2.reshape(ch2.size,1)
+    output = (a.T) @ b
+    return output[0,0]
 
 
 def best_offset(ch1, ch2, metric, Xrange=np.arange(-10, 10), 
@@ -137,7 +165,45 @@ def best_offset(ch1, ch2, metric, Xrange=np.arange(-10, 10),
     axis of the image/matrix, Yrange is the horizontal axis 
     """
     # TODO: Use metric to align ch2 to ch1 and return optimal offsets
-    pass
+    best_similar_X = 0
+    best_similar_Y = 0
+
+    for i in Xrange:
+        temp = np.roll(ch2,i, axis=0)
+        H = temp.shape[0]
+        #breakpoint()
+
+        if i < 0:
+            similar_x = metric(ch1[0:H+i,:],temp[0:H+i,:])
+        else:
+            similar_x = metric(ch1[i:,:], temp[i:,:])
+        
+        if similar_x > best_similar_X:
+            best_similar_X = similar_x
+            best_offset_X = i
+        #breakpoint()
+
+    #breakpoint()
+    for i in Yrange:
+        temp = np.roll(ch2, i, axis=1)
+        W = temp.shape[1]
+        #breakpoint()
+
+        if i < 0:
+            similar_y = metric(ch1[:,0:W+i], temp[:,0:W+i])
+        else:
+            similar_y = metric(ch1[:,i:], temp[:,i:])
+
+        if similar_y > best_similar_Y:
+            best_similar_Y = similar_y
+            best_offset_Y = i
+
+    #breakpoint()
+    return best_offset_X, best_offset_Y
+
+
+
+    
 
 
 def align_and_combine(R, G, B, metric):
@@ -150,12 +216,58 @@ def align_and_combine(R, G, B, metric):
     """
     # TODO: Use metric to align the three channels 
     # Hint: Use one channel as the anchor to align other two
-    pass
+
+    #fix R
+    G_offset_X, G_offset_Y = best_offset(R, G, metric, np.arange(-15,15), np.arange(-15,15))
+    B_offset_X, B_offset_Y = best_offset(R, B, metric, np.arange(-15,15), np.arange(-15,15))
+    G = np.roll(G, G_offset_X, axis=0)
+    G = np.roll(G, G_offset_Y, axis=1)
+
+    B = np.roll(B, B_offset_X, axis=0)
+    B = np.roll(B, B_offset_Y, axis=1)
+
+    print("G_offset: ",(G_offset_X, G_offset_Y))
+    print("B_offset: ", (B_offset_X, B_offset_Y))
 
 
-def pyramid_align():
+    # fix G
+    # R_offset_X, R_offset_Y = best_offset(G, R, metric, np.arange(-15,15), np.arange(-15,15))
+    # B_offset_X, B_offset_Y = best_offset(G, B, metric, np.arange(-15,15), np.arange(-15,15))
+
+    # R = np.roll(R, R_offset_X, axis=0)
+    # R = np.roll(R, R_offset_Y, axis=1)
+    # B = np.roll(B, B_offset_X, axis=0)
+    # B = np.roll(B, B_offset_Y, axis=1)
+
+    # print("R_offset: ",(R_offset_X, R_offset_Y))
+    # print("B_offset: ", (B_offset_X, B_offset_Y))
+
+
+    #fix B
+    # R_offset_X, R_offset_Y = best_offset(B, R, metric, np.arange(-15,15), np.arange(-15,15))
+    # G_offset_X, G_offset_Y = best_offset(B, G, metric, np.arange(-15,15), np.arange(-15,15))
+
+    # R = np.roll(R, R_offset_X, axis=0)
+    # R = np.roll(R, R_offset_Y, axis=1)
+
+    # G = np.roll(G, G_offset_X, axis=0)
+    # G = np.roll(G, G_offset_Y, axis=1)
+
+    # print("R_offset: ",(R_offset_X, R_offset_Y))
+    # print("G_offset: ", (G_offset_X, G_offset_Y))
+
+
+
+    aligned_image = np.stack((R,G,B), axis=2)
+
+    return aligned_image
+
+
+def pyramid_align(R, G, B, metric):
     # TODO: Reuse the functions from task 2 to perform the 
     # image pyramid alignment iteratively or recursively
+
+
     pass
 
 
@@ -163,11 +275,30 @@ def part2():
     # TODO: Solution for Q2
     # Task 1: Generate a colour image by splitting 
     # the triptych image and save it 
+    
+    #triptych = plt.imread('prokudin-gorskii/00125v.jpg')
+    #triptych = plt.imread('prokudin-gorskii/00149v.jpg')
+    #triptych = plt.imread('prokudin-gorskii/00153v.jpg')
+    #triptych = plt.imread('prokudin-gorskii/00351v.jpg')
+    #triptych = plt.imread('prokudin-gorskii/00398v.jpg')
+    #triptych = plt.imread('prokudin-gorskii/01112v.jpg')
+    triptych = plt.imread('tableau/efros_tableau.jpg')
+    R, G, B = split_triptych(triptych)
+    colored_image = np.stack((R,G,B), axis=2)
+    plt.imsave('colored.png',colored_image)
+    
 
     # Task 2: Remove misalignment in the colour channels 
     # by calculating best offset
+    #best_offset(R, G, normalized_cross_correlation, np.arange(-15,15), np.arange(-15,15))
+    aligned_image = align_and_combine(R,G,B,normalized_cross_correlation)
+    plt.imsave('aligned_colored_6.png', aligned_image)
+    nonnormalized_image = align_and_combine(R,G,B,cross_correlation)
+    plt.imsave('nonnormalized_aligned_6.png', nonnormalized_image)
     
     # Task 3: Pyramid alignment
+
+
     pass
 
 
@@ -177,7 +308,7 @@ def part3():
     
 
 def main():
-    part1()
+    #part1()
     part2()
     part3()
 
