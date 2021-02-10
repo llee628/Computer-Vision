@@ -111,14 +111,16 @@ def split_triptych(trip):
     W = trip.shape[1]
     #breakpoint()
 
+    H = H - (H%3)
+    R, G, B = trip[int(2*H/3):H,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:]
     
     # TODO: Split a triptych into thirds and
-    if H%3 == 0:
-        R, G, B = trip[int(2*H/3):H,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:]
-    elif H%3 == 1:
-        R, G, B = trip[int(2*H/3):H-1,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:]
-    else:
-        R, G, B = trip[int(2*H/3):H-2,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:] 
+    # if H%3 == 0:
+    #     R, G, B = trip[int(2*H/3):H,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:]
+    # elif H%3 == 1:
+    #     R, G, B = trip[int(2*H/3):H-1,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:]
+    # else:
+    #     R, G, B = trip[int(2*H/3):H-2,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:] 
     #breakpoint()
     # return three channels as numpy arrays
     return R, G, B
@@ -262,13 +264,68 @@ def align_and_combine(R, G, B, metric):
 
     return aligned_image
 
+def downsample(img, scale_percent=25):
+    width = int(img.shape[1] * scale_percent/100)
+    height = int(img.shape[0] * scale_percent/100)
+    dim = (width, height)
 
-def pyramid_align(R, G, B, metric):
+    resized = cv2.resize(img, dim)
+    return resized
+
+
+def pyramid_align(triptych):
     # TODO: Reuse the functions from task 2 to perform the 
     # image pyramid alignment iteratively or recursively
+    pyramid = []
 
+    level_0 = triptych
+    pyramid.append(level_0)
 
-    pass
+    level_1 = downsample(level_0)
+    pyramid.append(level_1)
+
+    level_2 = downsample(level_1)
+    pyramid.append(level_2)
+
+    pyramid.reverse()
+
+    G_offset_X, G_offset_Y = 0, 0
+    B_offset_X, B_offset_Y = 0, 0
+    
+    G_total_X, G_total_Y = 0, 0
+    B_total_X, B_total_Y = 0, 0
+    #breakpoint()
+    for idx, level in enumerate(pyramid):
+        G_total_X += G_offset_X
+        G_total_Y += G_offset_Y
+        B_total_X += B_offset_X
+        B_total_Y += B_offset_Y
+        print("level_", 2 - idx)
+        print("G_offset:", (G_offset_X, G_offset_Y))
+        print("B_offset:", (B_offset_X, B_offset_Y))
+        R, G, B = split_triptych(level)
+        G = np.roll(G, G_offset_X, axis=0)
+        G = np.roll(G, G_offset_Y, axis=1)
+
+        B = np.roll(B, B_offset_X, axis=0)
+        B = np.roll(B, B_offset_Y, axis=1)
+        #breakpoint()
+        if idx == 2:
+            break
+        #fix R
+        G_offset_X, G_offset_Y = best_offset(R,G,normalized_cross_correlation)
+        B_offset_X, B_offset_Y = best_offset(R,B,normalized_cross_correlation)
+        
+        G_offset_X = G_offset_X*4
+        G_offset_Y = G_offset_Y*4
+        B_offset_X = B_offset_X*4
+        B_offset_Y = B_offset_Y*4
+
+    print("G_total_offset: ", (G_total_X, G_total_Y))
+    print("B_total_offset: ", (B_total_X, B_total_Y))
+
+    aligned_image = np.stack((R,G,B), axis=2)
+    return aligned_image
 
 
 def part2():
@@ -290,20 +347,31 @@ def part2():
 
     # Task 2: Remove misalignment in the colour channels 
     # by calculating best offset
-    #best_offset(R, G, normalized_cross_correlation, np.arange(-15,15), np.arange(-15,15))
+
     aligned_image = align_and_combine(R,G,B,normalized_cross_correlation)
-    plt.imsave('aligned_colored_6.png', aligned_image)
+    plt.imsave('aligned_colored.png', aligned_image)
     nonnormalized_image = align_and_combine(R,G,B,cross_correlation)
-    plt.imsave('nonnormalized_aligned_6.png', nonnormalized_image)
+    plt.imsave('nonnormalized_aligned.png', nonnormalized_image)
     
     # Task 3: Pyramid alignment
 
+    #seoul_tableau
+    triptych = plt.imread('tableau/seoul_tableau.jpg')
+    pyramid_align_image = pyramid_align(triptych)
+    plt.imsave('pyramid_align_image_1.png',pyramid_align_image)
+
+    #vancouver_tableau
+    triptych = plt.imread('tableau/vancouver_tableau.jpg')
+    pyramid_align_image = pyramid_align(triptych)
+    plt.imsave('pyramid_align_image_2.png',pyramid_align_image)
 
     pass
 
 
 def part3():
     # TODO: Solution for Q3
+
+
     pass
     
 
