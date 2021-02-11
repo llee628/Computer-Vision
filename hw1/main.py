@@ -42,7 +42,7 @@ def rotY(theta):
     Ry_theta[1,1] = 1
     Ry_theta[2,0] = -(np.sin(theta))
     Ry_theta[2,2] = np.cos(theta)
-    #breakpoint()
+    
 
     return Ry_theta
 
@@ -109,20 +109,12 @@ def split_triptych(trip):
     """
     H = trip.shape[0]
     W = trip.shape[1]
-    #breakpoint()
-
+    
     H = H - (H%3)
-    R, G, B = trip[int(2*H/3):H,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:]
+    
     
     # TODO: Split a triptych into thirds and
-    # if H%3 == 0:
-    #     R, G, B = trip[int(2*H/3):H,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:]
-    # elif H%3 == 1:
-    #     R, G, B = trip[int(2*H/3):H-1,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:]
-    # else:
-    #     R, G, B = trip[int(2*H/3):H-2,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:] 
-    #breakpoint()
-    # return three channels as numpy arrays
+    R, G, B = trip[int(2*H/3):H,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:]
     return R, G, B
 
 
@@ -139,7 +131,6 @@ def normalized_cross_correlation(ch1, ch2):
     b = b/np.linalg.norm(b)
 
     output = (a.T) @ b
-    #breakpoint()
 
     return output[0,0]
 
@@ -173,7 +164,7 @@ def best_offset(ch1, ch2, metric, Xrange=np.arange(-10, 10),
     for i in Xrange:
         temp = np.roll(ch2,i, axis=0)
         H = temp.shape[0]
-        #breakpoint()
+        
 
         if i < 0:
             similar_x = metric(ch1[0:H+i,:],temp[0:H+i,:])
@@ -183,13 +174,13 @@ def best_offset(ch1, ch2, metric, Xrange=np.arange(-10, 10),
         if similar_x > best_similar_X:
             best_similar_X = similar_x
             best_offset_X = i
-        #breakpoint()
+        
 
-    #breakpoint()
+    
     for i in Yrange:
         temp = np.roll(ch2, i, axis=1)
         W = temp.shape[1]
-        #breakpoint()
+        
 
         if i < 0:
             similar_y = metric(ch1[:,0:W+i], temp[:,0:W+i])
@@ -200,7 +191,6 @@ def best_offset(ch1, ch2, metric, Xrange=np.arange(-10, 10),
             best_similar_Y = similar_y
             best_offset_Y = i
 
-    #breakpoint()
     return best_offset_X, best_offset_Y
 
 
@@ -294,7 +284,7 @@ def pyramid_align(triptych):
     
     G_total_X, G_total_Y = 0, 0
     B_total_X, B_total_Y = 0, 0
-    #breakpoint()
+    
     for idx, level in enumerate(pyramid):
         G_total_X += G_offset_X
         G_total_Y += G_offset_Y
@@ -309,7 +299,7 @@ def pyramid_align(triptych):
 
         B = np.roll(B, B_offset_X, axis=0)
         B = np.roll(B, B_offset_Y, axis=1)
-        #breakpoint()
+        
         if idx == 2:
             break
         #fix R
@@ -367,16 +357,76 @@ def part2():
 
     pass
 
+def RGBtoLAB(image):
+    
+    image = (image*255).astype(np.uint8)
+    imageLAB = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
+
+    
+    return imageLAB
+
+def task3_1():
+    image1 = plt.imread('rubik/indoor.png')
+    image2 = plt.imread('rubik/outdoor.png')
+    plt.imshow(image1[:,:,0], cmap='gray')
+    plt.savefig('indoor_R.png')
+    plt.imshow(image1[:,:,1], cmap='gray')
+    plt.savefig('indoor_G.png')
+    plt.imshow(image1[:,:,2], cmap='gray')
+    plt.savefig('indoor_B.png')
+
+    plt.imshow(image2[:,:,0], cmap='gray')
+    plt.savefig('outdoor_R.png')
+    plt.imshow(image2[:,:,1], cmap='gray')
+    plt.savefig('outdoor_G.png')
+    plt.imshow(image2[:,:,2], cmap='gray')
+    plt.savefig('outdoor_B.png')
+
+    plt.imshow(RGBtoLAB(image1)[:,:,0], cmap='gray')
+    plt.savefig('indoor_L.png')
+    plt.imshow(RGBtoLAB(image1)[:,:,1], cmap='gray')
+    plt.savefig('indoor_aa.png')
+    plt.imshow(RGBtoLAB(image1)[:,:,2], cmap='gray')
+    plt.savefig('indoor_bb.png')
+
+    plt.imshow(RGBtoLAB(image2)[:,:,0], cmap='gray')
+    plt.savefig('outdoor_L.png')
+    plt.imshow(RGBtoLAB(image2)[:,:,1], cmap='gray')
+    plt.savefig('outdoor_aa.png')
+    plt.imshow(RGBtoLAB(image2)[:,:,2], cmap='gray')
+    plt.savefig('outdoor_bb.png')
+
+    pass
+
 
 def part3():
     # TODO: Solution for Q3
+    #1 2
+    task3_1()
+
+    #3
+    imageiPad1_raw = plt.imread('IMG_1663.JPG')
+    imageiPad2_raw = plt.imread('IMG_1664.JPG')
+
+    imageiPad1_resize = cv2.resize(imageiPad1_raw, (256,256))
+    imageiPad2_resize = cv2.resize(imageiPad2_raw, (256,256))
+
+    plt.imshow(imageiPad1_resize)
+    plt.show()
+    plt.imshow(imageiPad2_resize)
+    plt.show()
+    # fig, axs = plt.subplots(1,2)
+    # axs[0].imshow(imageiPad1_resize)
+    # axs[1].imshow(imageiPad2_resize)
+    # plt.show()
+
 
 
     pass
     
 
 def main():
-    #part1()
+    part1()
     part2()
     part3()
 
