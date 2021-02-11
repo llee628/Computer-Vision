@@ -100,6 +100,8 @@ def part1():
 
     pass
 
+def trim_borders(img, offset_h, offset_w):
+    return img[offset_h:-offset_h, offset_w:-offset_w]
 
 def split_triptych(trip):
     """
@@ -115,6 +117,9 @@ def split_triptych(trip):
     
     # TODO: Split a triptych into thirds and
     R, G, B = trip[int(2*H/3):H,:], trip[int(H/3):int(2*H/3),:], trip[0:int(H/3),:]
+    R = trim_borders(R,10,10)
+    G = trim_borders(G,10,10)
+    B = trim_borders(B,10,10)
     return R, G, B
 
 
@@ -176,7 +181,7 @@ def best_offset(ch1, ch2, metric, Xrange=np.arange(-10, 10),
             best_offset_X = i
         
 
-    
+    ch2 = np.roll(ch2, best_offset_X, axis=0)
     for i in Yrange:
         temp = np.roll(ch2, i, axis=1)
         W = temp.shape[1]
@@ -325,11 +330,11 @@ def part2():
     
     #triptych = plt.imread('prokudin-gorskii/00125v.jpg')
     #triptych = plt.imread('prokudin-gorskii/00149v.jpg')
-    #triptych = plt.imread('prokudin-gorskii/00153v.jpg')
+    triptych = plt.imread('prokudin-gorskii/00153v.jpg')
     #triptych = plt.imread('prokudin-gorskii/00351v.jpg')
     #triptych = plt.imread('prokudin-gorskii/00398v.jpg')
     #triptych = plt.imread('prokudin-gorskii/01112v.jpg')
-    triptych = plt.imread('tableau/efros_tableau.jpg')
+    #triptych = plt.imread('tableau/efros_tableau.jpg')
     R, G, B = split_triptych(triptych)
     colored_image = np.stack((R,G,B), axis=2)
     plt.imsave('colored.png',colored_image)
