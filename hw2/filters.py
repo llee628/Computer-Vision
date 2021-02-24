@@ -3,6 +3,7 @@ import os
 import numpy as np
 
 from common import read_img, save_img
+import pdb
 
 
 def image_patches(image, patch_size=(16, 16)):
@@ -16,7 +17,24 @@ def image_patches(image, patch_size=(16, 16)):
     Output- results: a list of images of size M x N
     """
     # TODO: Use slicing to complete the function
+    #breakpoint()
     output = []
+    H = image.shape[0]
+    W = image.shape[1]
+    M = patch_size[0]
+    N = patch_size[1]
+
+    for r in range(0, H - M):
+        for c in range(0, W - N):
+            patch = image[r:r+M, c:c+N]
+            Mean = np.mean(patch)
+            Std = np.std(patch)
+            patch = (patch - Mean)/Std
+            #breakpoint()
+            output.append(patch)
+
+    #breakpoint()    
+
     return output
 
 
@@ -30,7 +48,27 @@ def convolve(image, kernel):
            kernel: h x w
     Output- convolve: H x W
     """
-    output = None
+
+    H = image.shape[0]
+    W = image.shape[1]
+    h = kernel.shape[0]
+    w = kernel.shape[1]
+
+    output = np.zeros((H,W))
+
+    #flip the order of the kernel
+    kernel = kernel[::-1, ::-1]
+
+    #zero-padding
+    image = np.pad(image, ((1,1),(1,1)), 'constant')
+
+    #convolution
+    for r in range(H):
+        for c in range(W):
+            output[r,c] = np.sum(image[r:r+h, c:c+w]*kernel)
+
+    #breakpoint()
+
     return output
 
 
@@ -66,6 +104,24 @@ def sobel_operator(image):
 
     return Gx, Gy, grad_magnitude
 
+def gaussian_kernel_generator(sigma, size=(3,3)):
+    output = np.zeros(size)
+    H = size[0]
+    W = size[1]
+    #breakpoint()
+    m = H//2
+    n = W//2
+
+    for i in range(-m, m+1):
+        for j in range(-n, n+1):
+            output[i+m,j+n] = (1.0/(2*(np.pi)*(sigma**2)))*np.exp(-((i**2) + (j**2))/(2*(sigma**2)))
+
+    #breakpoint()
+    #smoothing filter
+    output_sum = np.sum(output)
+    output = output/output_sum
+    breakpoint()
+    return output
 
 
 
@@ -79,17 +135,21 @@ def main():
     # -- TODO Task 1: Image Patches --
     # (a)
     # First complete image_patches()
-    patches = image_patches(img)
-    # Now choose any three patches and save them
-    # chosen_patches should have those patches stacked vertically/horizontally
-    chosen_patches = None
-    save_img(chosen_patches, "./image_patches/q1_patch.png")
-
+    # patches = image_patches(img)
+    # # Now choose any three patches and save them
+    # # chosen_patches should have those patches stacked vertically/horizontally
+    # chosen_patches = patches[0]
+    # chosen_patches = np.vstack((chosen_patches, patches[1]))
+    # chosen_patches = np.vstack((chosen_patches, patches[2]))
+    # save_img(chosen_patches, "./image_patches/q1_patch.png")
+    #
     # (b), (c): No code
 
     """ Convolution and Gaussian Filter """
     if not os.path.exists("./gaussian_filter"):
         os.makedirs("./gaussian_filter")
+
+    #breakpoint()
 
     # -- TODO Task 2: Convolution and Gaussian Filter --
     # (a): No code
@@ -99,11 +159,16 @@ def main():
     # (c)
     # Calculate the Gaussian kernel described in the question.
     # There is tolerance for the kernel.
-    kernel_gaussian = None
+    sigma = 0.572
+    #sigma = 2.0
+    kernel_gaussian = gaussian_kernel_generator(sigma)
+
 
     filtered_gaussian = convolve(img, kernel_gaussian)
     save_img(filtered_gaussian, "./gaussian_filter/q2_gaussian.png")
+    #breakpoint()
 
+    #
     # (d), (e): No code
 
     # (f): Complete edge_detection()
