@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 from common import read_img, save_img
 import pdb
@@ -60,7 +61,9 @@ def convolve(image, kernel):
     kernel = kernel[::-1, ::-1]
 
     #zero-padding
-    image = np.pad(image, ((1,1),(1,1)), 'constant')
+    vertical_size = h//2
+    horizon_size = w//2
+    image = np.pad(image, ((vertical_size,vertical_size),(horizon_size,horizon_size)), 'constant')
 
     #convolution
     for r in range(H):
@@ -80,15 +83,18 @@ def edge_detection(image):
     Output- Ix, Iy, grad_magnitude: H x W
     """
     # TODO: Fix kx, ky
-    kx = None  # 1 x 3
-    ky = None  # 3 x 1
+    kx = np.array([[1, 0, -1]])  # 1 x 3
+    ky = np.array([[1],[0],[-1]])  # 3 x 1
+
 
     Ix = convolve(image, kx)
     Iy = convolve(image, ky)
 
+   
     # TODO: Use Ix, Iy to calculate grad_magnitude
-    grad_magnitude = None
+    grad_magnitude = np.sqrt((Ix**2) + (Iy**2) )
 
+    #breakpoint()
     return Ix, Iy, grad_magnitude
 
 
@@ -100,7 +106,14 @@ def sobel_operator(image):
     Output- Gx, Gy, grad_magnitude: H x W
     """
     # TODO: Use convolve() to complete the function
-    Gx, Gy, grad_magnitude = None, None, None
+    #Gx, Gy, grad_magnitude = None, None, None
+    Sx = np.array([[1,0,-1],[2,0,-2],[1,0,-1]])
+    Sy = np.array([[1,2,1],[0,0,0],[-1,-2,-1]])
+    
+    Gx = convolve(image, Sx)
+    Gy = convolve(image, Sy)
+    grad_magnitude = np.sqrt((Gx**2) + (Gy**2))
+    #breakpoint()
 
     return Gx, Gy, grad_magnitude
 
@@ -120,7 +133,7 @@ def gaussian_kernel_generator(sigma, size=(3,3)):
     #smoothing filter
     output_sum = np.sum(output)
     output = output/output_sum
-    breakpoint()
+    #breakpoint()
     return output
 
 
@@ -133,17 +146,17 @@ def main():
         os.makedirs("./image_patches")
 
     # -- TODO Task 1: Image Patches --
-    # (a)
-    # First complete image_patches()
-    # patches = image_patches(img)
-    # # Now choose any three patches and save them
-    # # chosen_patches should have those patches stacked vertically/horizontally
-    # chosen_patches = patches[0]
-    # chosen_patches = np.vstack((chosen_patches, patches[1]))
-    # chosen_patches = np.vstack((chosen_patches, patches[2]))
-    # save_img(chosen_patches, "./image_patches/q1_patch.png")
-    #
-    # (b), (c): No code
+    (a)
+    First complete image_patches()
+    patches = image_patches(img)
+    # Now choose any three patches and save them
+    # chosen_patches should have those patches stacked vertically/horizontally
+    chosen_patches = patches[0]
+    chosen_patches = np.vstack((chosen_patches, patches[1]))
+    chosen_patches = np.vstack((chosen_patches, patches[2]))
+    save_img(chosen_patches, "./image_patches/q1_patch.png")
+    
+    #(b), (c): No code
 
     """ Convolution and Gaussian Filter """
     if not os.path.exists("./gaussian_filter"):
@@ -152,6 +165,7 @@ def main():
     #breakpoint()
 
     # -- TODO Task 2: Convolution and Gaussian Filter --
+    
     # (a): No code
 
     # (b): Complete convolve()
@@ -182,8 +196,11 @@ def main():
     save_img(edge_with_gaussian, "./gaussian_filter/q3_edge_gaussian.png")
 
     print("Gaussian Filter is done. ")
+    #breakpoint()
+    
 
     # -- TODO Task 3: Sobel Operator --
+    
     if not os.path.exists("./sobel_operator"):
         os.makedirs("./sobel_operator")
 
@@ -199,6 +216,8 @@ def main():
 
     print("Sobel Operator is done. ")
 
+    #breakpoint()
+    
     # -- TODO Task 4: LoG Filter --
     if not os.path.exists("./log_filter"):
         os.makedirs("./log_filter")
@@ -214,14 +233,28 @@ def main():
                             [3, 3, 5, 3, 0, 3, 5, 3, 3],
                             [0, 2, 3, 5, 5, 5, 3, 2, 0],
                             [0, 0, 3, 2, 2, 2, 3, 0, 0]])
-    filtered_LoG1 = None
-    filtered_LoG2 = None
+
+    #breakpoint()
+    
+    filtered_LoG1 = convolve(img, kernel_LoG1)
+    filtered_LoG2 = convolve(img, kernel_LoG2)
     # Use convolve() to convolve img with kernel_LOG1 and kernel_LOG2
     save_img(filtered_LoG1, "./log_filter/q1_LoG1.png")
     save_img(filtered_LoG2, "./log_filter/q1_LoG2.png")
 
     # (b)
     # Follow instructions in pdf to approximate LoG with a DoG
+    data = np.load('log1d.npz')
+    LoG_50 = data['log50']
+    gauss_50 = data['gauss50']
+    gauss_53 = data['gauss53']
+    DoG = gauss_53 - gauss_50
+    x = np.arange(-250,251)
+    plt.plot(x, LoG_50, label='Laplacian')
+    plt.plot(x, DoG, label='DoG')
+    plt.legend()
+    plt.show()
+    #breakpoint()
     print("LoG Filter is done. ")
 
 
