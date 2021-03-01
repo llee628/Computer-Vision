@@ -146,8 +146,8 @@ def main():
         os.makedirs("./image_patches")
 
     # -- TODO Task 1: Image Patches --
-    (a)
-    First complete image_patches()
+    #(a)
+    #First complete image_patches()
     patches = image_patches(img)
     # Now choose any three patches and save them
     # chosen_patches should have those patches stacked vertically/horizontally
