@@ -45,8 +45,28 @@ def fit_homography(XY):
 
     return H
 
+def random_points_pick(XY):
+    '''
+    randomly pick four data sets in XY then return
+    '''
+    k = 4
+    output = [XY[np.random.randint(0, XY.shape[0])] for i in range(k)]
+    #breakpoint()
+    output = np.array(output)
+    #breakpoint()
+    return output
 
-def RANSAC_fit_homography(XY, eps=1, nIters=1000):
+def points_distance(XY, H):
+    p = np.hstack((XY[:,[0]], XY[:,[1]]))
+    p_comma = np.hstack((XY[:,[2]], XY[:,[3]]))
+    #breakpoint()
+    T = homography_transform(p, H)
+    dist = np.linalg.norm(p_comma - T, axis=1)
+    return dist
+    #breakpoint()
+
+
+def RANSAC_fit_homography(XY, eps=0.5, nIters=1000):
     '''
     Perform RANSAC to find the homography transformation 
     matrix which has the most inliers
@@ -65,6 +85,22 @@ def RANSAC_fit_homography(XY, eps=1, nIters=1000):
     '''
     bestH, bestCount, bestInliers = np.eye(3), -1, np.zeros((XY.shape[0],))
     bestRefit = np.eye(3)
+
+    for trial in range(nIters):
+        subset = random_points_pick(XY)
+        H = fit_homography(subset)
+        E = points_distance(XY, H)
+        inliers = (E < eps)
+        inliers_num = np.count_nonzero(inliers)
+        if inliers_num > bestCount:
+            bestH = H
+            bestCount = inliers_num
+            bestInliers = inliers
+        #breakpoint()
+    refit_set = XY[bestInliers]
+    bestRefit = fit_homography(refit_set)
+    #breakpoint()
+
     return bestRefit
 
 def get_p(data):
